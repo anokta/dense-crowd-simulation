@@ -49,7 +49,7 @@ public class MapLoader : MonoBehaviour
                 map[y, x] = (mapTexture.GetPixel(x, y) == Color.black);
                 if (map[y, x])
                 {
-                    GameObject obstacle = GameObject.Instantiate(obstaclePrefab, new Vector3(x - mapTexture.width / 2, obstaclePrefab.transform.position.y, -y + mapTexture.height / 2), Quaternion.identity) as GameObject;
+                    GameObject obstacle = GameObject.Instantiate(obstaclePrefab, new Vector3(x - (mapTexture.width - 1) / 2.0f, obstaclePrefab.transform.position.y, -y + (mapTexture.height - 1) / 2.0f), Quaternion.identity) as GameObject;
                     obstacle.transform.parent = obstacleContainer;
                 }
             }
