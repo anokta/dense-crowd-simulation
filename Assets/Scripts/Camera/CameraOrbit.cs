@@ -20,7 +20,7 @@ public class CameraOrbit : MonoBehaviour
 
     void LateUpdate()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
         {
             x += Input.GetAxis("Mouse X") * speed.x;
             y -= Input.GetAxis("Mouse Y") * speed.y;
@@ -28,7 +28,7 @@ public class CameraOrbit : MonoBehaviour
             y = ClampAngle(y, minY, maxY);
 
             Quaternion rotation = Quaternion.Euler(y, x, 0);
-            
+
             transform.rotation = rotation;
             transform.position = rotation * new Vector3(0.0f, 0.0f, -distance);
         }
@@ -43,8 +43,8 @@ public class CameraOrbit : MonoBehaviour
 
     float ClampAngle(float angle, float min, float max)
     {
-        if (angle < -360)   angle += 360;
-        else if (angle > 360)   angle -= 360;
+        if (angle < -360) angle += 360;
+        else if (angle > 360) angle -= 360;
 
         return Mathf.Clamp(angle, min, max);
     }

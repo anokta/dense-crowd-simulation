@@ -56,8 +56,17 @@ public class MapLoader : MonoBehaviour
         }
     }
 
-    public static bool MapGrid(int x, int y)
+    public static bool IsAccessible(Vector2 location)
     {
+        int width = instance.mapTexture.width;
+        int height = instance.mapTexture.height;
+
+        int x = (int)(location.x + (width - 1) / 2.0f);
+        int y = (int)(-location.y + (height - 1) / 2.0f);
+
+        if (x < 0 || x >= width || y < 0 || y >= height)
+            return false;
+
         return instance.map[y, x];
     }
 }

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 
 public class AgentManager : MonoBehaviour
 {
-
     public GameObject agentPrefab;
 
     public int agentCount;
+ 
+    public float MIN_DISTANCE = 1.0f;
 
     List<Agent> agents;
 
@@ -25,7 +26,13 @@ public class AgentManager : MonoBehaviour
 
     void Update()
     {
-
+        for (int i = 0; i < agentCount; ++i)
+        {
+            for (int j = 0; j < agentCount; ++j)
+            {
+                ResolveCollision(agents[i], agents[j]);
+            }
+        }
     }
 
     void LoadAgentsIntoScene()
@@ -41,6 +48,16 @@ public class AgentManager : MonoBehaviour
             GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(-10.0f, 10.0f), 0.0f, Random.Range(-10.0f, 10.0f)), Quaternion.identity) as GameObject;
             agent.transform.parent = agentContainer;
             agents.Add(agent.GetComponent<Agent>());
+        }
+    }
+
+    void ResolveCollision(Agent a1, Agent a2)
+    {
+        float distance = Vector3.Distance(a1.Position, a2.Position);
+
+        if (distance < MIN_DISTANCE)
+        {
+            a1.Position += Vector3.Normalize(a1.Position - a2.Position) * (MIN_DISTANCE - distance);
         }
     }
 
