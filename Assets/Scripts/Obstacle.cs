@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Obstacle : MonoBehaviour {
+public class Obstacle : MonoBehaviour
+{
     Transform obstacleTransform;
 
     public Vector3 Position
@@ -10,7 +11,8 @@ public class Obstacle : MonoBehaviour {
         set { obstacleTransform.position = value; }
     }
 
-	void Awake () {
+    void Awake()
+    {
         obstacleTransform = transform;
-	}
+    }
 }

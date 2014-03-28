@@ -227,8 +227,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556d970b54ddb4a4daaecc3e04d9ae19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 200
+  agentCount: 100
   minDistance: 1
+  maxVelocity: 2
   agentPrefab: {fileID: 100000, guid: 7e7f46137cd82dc488171ed460e61ffb, type: 2}
 --- !u!1 &1994872892
 GameObject:

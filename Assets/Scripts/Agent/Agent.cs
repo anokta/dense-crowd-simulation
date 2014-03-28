@@ -11,71 +11,36 @@ public class Agent : MonoBehaviour
         set { agentTransform.position = value; }
     }
 
+    Vector3 velocity;
     public Vector3 Velocity
     {
-        get;
-        set;
+        get { return velocity; }
+        set { velocity = value.normalized * maxVelocity; }
     }
 
-    public float minDistance;
+    float maxVelocity;
+    public float MaxVelocity
+    {
+        get { return MaxVelocity; }
+        set { maxVelocity = value; }
+    }
+
+    Vector3 target;
+    public Vector3 Target
+    {
+        get { return target; }
+        set { target = value; }
+    }
 
     void Awake()
     {
         agentTransform = transform;
 
-        minDistance = GetComponent<CapsuleCollider>().radius * 2.0f;
+        target = new Vector3(Random.Range(-10.0f, 10.0f), 0.0f, Random.Range(-10.0f, 10.0f));
     }
 
     void Update()
     {
         agentTransform.position += Velocity * Time.deltaTime;
-    }
-
-    void OnTriggerEnter(Collider collider)
-    {
-        string type = collider.tag;
-
-        if (type == "Agent")
-        {
-            resolveAgentCollision(collider.transform.position);
-        }
-        else if (type == "Obstacle")
-        {
-            resolveObstacleCollision(collider.transform.position);
-        }
-    }
-
-    void OnTriggerStay(Collider collider)
-    {
-        string type = collider.tag;
-
-        if (type == "Agent")
-        {
-            resolveAgentCollision(collider.transform.position);
-        }
-        else if (type == "Obstacle")
-        {
-            resolveObstacleCollision(collider.transform.position);
-        }
-    }
-
-    void resolveAgentCollision(Vector3 p)
-    {
-        float distance = Vector3.Distance(Position, p);
-
-        Position += Vector3.Normalize(Position - p) * (minDistance - distance);
-    }
-
-    void resolveObstacleCollision(Vector3 p)
-    {
-        float distanceX = Mathf.Abs(Position.x - p.x);
-        float distanceZ = Mathf.Abs(Position.z - p.z);
-
-        Vector3 agentPosition = Position;
-        if (distanceX > distanceZ)
-            agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * (minDistance - distanceX);
-        else
-            agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * (minDistance - distanceZ);
-        Position = agentPosition;
     }
 }

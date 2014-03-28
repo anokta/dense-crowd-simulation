@@ -8,6 +8,8 @@ public class SceneManager : MonoBehaviour
     MapLoader mapLoader;
     AgentManager agentManager;
 
+    Obstacle[] obstacles;
+
     void Start()
     {
         mapLoader = GetComponent<MapLoader>();
@@ -15,6 +17,8 @@ public class SceneManager : MonoBehaviour
 
         agentManager = GetComponent<AgentManager>();
         agentManager.LoadAgentsIntoScene();
+
+        obstacles = FindObjectsOfType<Obstacle>();
     }
 
     void Update()
@@ -26,7 +30,12 @@ public class SceneManager : MonoBehaviour
 
         for (int i = 0; i < agentManager.GetAgentCount(); ++i)
         {
-            agentManager.GetAgent(i).Velocity += new Vector3(Random.Range(-0.25f, 0.25f), 0.0f, Random.Range(-0.25f, 0.25f));
+            agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Velocity;
         }
+    }
+
+    void LateUpdate()
+    {
+        agentManager.ResolveCollision(obstacles);
     }
 }
