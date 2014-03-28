@@ -4,45 +4,26 @@ using System.Collections.Generic;
 
 public class AgentManager : MonoBehaviour
 {
-    public GameObject agentPrefab;
+    public int agentCount = 100;
 
-    public int agentCount;
- 
-    public float MIN_DISTANCE = 1.0f;
+    public float minDistance = 1.0f;
+
+    public GameObject agentPrefab;
 
     List<Agent> agents;
 
-    static AgentManager instance;
-
     void Awake()
     {
-        instance = this;
+        agents = new List<Agent>();
     }
 
-    void Start()
-    {
-        LoadAgentsIntoScene();
-    }
-
-    void Update()
-    {
-        for (int i = 0; i < agentCount; ++i)
-        {
-            for (int j = 0; j < agentCount; ++j)
-            {
-                ResolveCollision(agents[i], agents[j]);
-            }
-        }
-    }
-
-    void LoadAgentsIntoScene()
+    public void LoadAgentsIntoScene()
     {
         Transform entityContainer = GameObject.Find("20 Entities").transform;
 
         Transform agentContainer = new GameObject("Agents").transform;
         agentContainer.parent = entityContainer.transform;
 
-        agents = new List<Agent>();
         for (int i = 0; i < agentCount; ++i)
         {
             GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(-10.0f, 10.0f), 0.0f, Random.Range(-10.0f, 10.0f)), Quaternion.identity) as GameObject;
@@ -51,23 +32,13 @@ public class AgentManager : MonoBehaviour
         }
     }
 
-    void ResolveCollision(Agent a1, Agent a2)
+    public int GetAgentCount()
     {
-        float distance = Vector3.Distance(a1.Position, a2.Position);
-
-        if (distance < MIN_DISTANCE)
-        {
-            a1.Position += Vector3.Normalize(a1.Position - a2.Position) * (MIN_DISTANCE - distance);
-        }
+        return agentCount;
     }
 
-    public static int GetAgentCount()
+    public Agent GetAgent(int i)
     {
-        return instance.agentCount;
-    }
-
-    public static Agent GetAgent(int i)
-    {
-        return instance.agents[i];
+        return agents[i];
     }
 }
