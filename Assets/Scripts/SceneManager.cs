@@ -10,6 +10,9 @@ public class SceneManager : MonoBehaviour
 
     Obstacle[] obstacles;
 
+
+    Agent testAgent;
+
     void Start()
     {
         mapLoader = GetComponent<MapLoader>();
@@ -19,6 +22,8 @@ public class SceneManager : MonoBehaviour
         agentManager.LoadAgentsIntoScene();
 
         obstacles = FindObjectsOfType<Obstacle>();
+
+        testAgent = agentManager.GetAgent(0);
     }
 
     void Update()
@@ -26,7 +31,7 @@ public class SceneManager : MonoBehaviour
         //float x = Input.GetAxisRaw("Horizontal") * 5.0f;
         //float y = Input.GetAxisRaw("Vertical") * 5.0f;
 
-        //agentManager.GetAgent(0).Velocity = new Vector3(x, 0.0f, y);
+        //testAgent.Velocity = new Vector3(x, 0.0f, y);
 
         for (int i = 0; i < agentManager.GetAgentCount(); ++i)
         {

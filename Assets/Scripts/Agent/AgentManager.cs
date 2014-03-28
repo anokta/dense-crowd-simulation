@@ -23,7 +23,7 @@ public class AgentManager : MonoBehaviour
         agents = new List<Agent>();
         for (int i = 0; i < agentCount; ++i)
         {
-            GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(-10.0f, 10.0f), 0.0f, Random.Range(-10.0f, 10.0f)), Quaternion.identity) as GameObject;
+            GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(0.0f, 10.0f), 0.0f, Random.Range(0.0f, 10.0f)), Quaternion.identity) as GameObject;
             agent.transform.parent = agentContainer;
             agents.Add(agent.GetComponent<Agent>());
             agents[i].MaxVelocity = 2.0f;
@@ -44,42 +44,64 @@ public class AgentManager : MonoBehaviour
     {
         for (int i = 0; i < agentCount; ++i)
         {
-            for (int j = 0; j < agentCount; ++j)
+            RaycastHit[] hits = Physics.SphereCastAll(agents[i].Position, minDistance, agents[i].Velocity, minDistance);
+            if (hits.Length > 0)
             {
-                resolveAgentCollision(agents[i], agents[j].Position);
+                for (int j = 0; j < hits.Length; ++j)
+                {
+                    switch (hits[j].transform.tag)
+                    {
+                        case "Agent":
+                            hits[j].transform.position -= hits[j].normal * hits[j].distance;
+                            break;
+                        case "Obstacle":
+                            agents[i].Position += hits[j].normal * hits[j].distance;
+                            break;
+                    }
+                }
             }
-
-            for (int j = 0; j < obstacles.Length; ++j)
-            {
-                resolveObstacleCollision(agents[i], obstacles[j].Position);
-            }
         }
     }
 
-    void resolveAgentCollision(Agent a1, Vector3 p)
-    {
-        float distance = Vector3.Distance(a1.Position, p);
+    //bool resolveAgentCollision(Agent a1, Vector3 p)
+    //{
+    //    float distance = Vector3.Distance(a1.Position, p);
 
-        if (distance < minDistance)
-        {
-            a1.Position += Vector3.Normalize(a1.Position - p) * (minDistance - distance);
-        }
-    }
+    //    if (distance < minDistance)
+    //    {
+    //        a1.Position += Vector3.Normalize(a1.Position - p) * (minDistance - distance);
 
-    void resolveObstacleCollision(Agent a1, Vector3 p)
-    {
-        Vector3 agentPosition = a1.Position;
+    //        return true;
+    //    }
 
-        float distanceX = Mathf.Abs(agentPosition.x - p.x);
-        float distanceZ = Mathf.Abs(agentPosition.z - p.z);
+    //    return false;
+    //}
 
-        if (distanceX < minDistance && distanceZ < minDistance)
-        {
-            if (distanceX > distanceZ)
-                agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * (minDistance - distanceX);
-            else
-                agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * (minDistance - distanceZ);
-            a1.Position = agentPosition;
-        }
-    }
+    //void resolveObstacleCollision(Agent a1, Vector3 p)
+    //{
+    //    Vector3 agentPosition = a1.Position;
+
+    //    float distanceX = Mathf.Abs(agentPosition.x - p.x);
+    //    float distanceZ = Mathf.Abs(agentPosition.z - p.z);
+
+    //    if (distanceX < minDistance && distanceZ < minDistance)
+    //    {
+    //        if (distanceX > distanceZ)
+    //            agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * (minDistance - distanceX);
+    //        else
+    //            agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * (minDistance - distanceZ);
+    //        a1.Position = agentPosition;
+    //    }
+    //}
+
+    //static int CompareAgentsByPosition(Agent a1, Agent a2)
+    //{
+    //    float diff = a1.Position.sqrMagnitude - a2.Position.sqrMagnitude;
+    //    if (diff < 0)
+    //        return -1;
+    //    else if (diff > 0)
+    //        return 1;
+    //    else
+    //        return 0;
+    //}
 }

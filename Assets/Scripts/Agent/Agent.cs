@@ -36,7 +36,7 @@ public class Agent : MonoBehaviour
     {
         agentTransform = transform;
 
-        target = new Vector3(Random.Range(-100.0f, 100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
+        target = new Vector3(Random.Range(0.0f, 100.0f), 0.0f, Random.Range(0.0f, 100.0f));
     }
 
     void Update()

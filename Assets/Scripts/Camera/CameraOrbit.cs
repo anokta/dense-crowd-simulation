@@ -9,6 +9,8 @@ public class CameraOrbit : MonoBehaviour
     float x, y;
     float distance;
 
+    Vector3 position;
+
     void Start()
     {
         Vector3 angles = transform.eulerAngles;
@@ -16,6 +18,9 @@ public class CameraOrbit : MonoBehaviour
         y = angles.x;
 
         distance = transform.position.y;
+
+        position = transform.position;
+        position.y = 0.0f;
     }
 
     void LateUpdate()
@@ -30,14 +35,14 @@ public class CameraOrbit : MonoBehaviour
             Quaternion rotation = Quaternion.Euler(y, x, 0);
 
             transform.rotation = rotation;
-            transform.position = rotation * new Vector3(0.0f, 0.0f, -distance);
+            transform.position = rotation * new Vector3(0.0f, 0.0f, -distance) + position;
         }
 
         if (Input.GetAxis("Mouse ScrollWheel") != 0)
         {
             distance -= speed.z * Input.GetAxis("Mouse ScrollWheel");
 
-            transform.position = Quaternion.Euler(y, x, 0) * new Vector3(0.0f, 0.0f, -distance);
+            transform.position = Quaternion.Euler(y, x, 0) * new Vector3(0.0f, 0.0f, -distance) + position;
         }
     }
 
