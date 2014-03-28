@@ -30,7 +30,7 @@ public class SceneManager : MonoBehaviour
 
         for (int i = 0; i < agentManager.GetAgentCount(); ++i)
         {
-            agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Velocity;
+            agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
         }
     }
 
