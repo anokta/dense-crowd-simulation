@@ -44,55 +44,54 @@ public class AgentManager : MonoBehaviour
     {
         for (int i = 0; i < agentCount; ++i)
         {
-            RaycastHit[] hits = Physics.SphereCastAll(agents[i].Position, minDistance, agents[i].Velocity, minDistance);
+            Collider[] hits = Physics.OverlapSphere(agents[i].Position, 2.0f * minDistance);
             if (hits.Length > 0)
             {
                 for (int j = 0; j < hits.Length; ++j)
                 {
-                    switch (hits[j].transform.tag)
+                    if (hits[j] != agents[i].collider)
                     {
-                        case "Agent":
-                            hits[j].transform.position -= hits[j].normal * hits[j].distance;
-                            break;
-                        case "Obstacle":
-                            agents[i].Position += hits[j].normal * hits[j].distance;
-                            break;
+                        switch (hits[j].transform.tag)
+                        {
+                            case "Agent":
+                                resolveAgentCollision(agents[i], hits[j].transform.position);
+                                break;
+                            case "Obstacle":
+                                resolveObstacleCollision(agents[i], hits[j].transform.position);
+                                break;
+                        }
                     }
                 }
             }
         }
     }
 
-    //bool resolveAgentCollision(Agent a1, Vector3 p)
-    //{
-    //    float distance = Vector3.Distance(a1.Position, p);
+    void resolveAgentCollision(Agent a1, Vector3 p)
+    {
+        float distance = Vector3.Distance(a1.Position, p);
 
-    //    if (distance < minDistance)
-    //    {
-    //        a1.Position += Vector3.Normalize(a1.Position - p) * (minDistance - distance);
+        ///if (distance < minDistance)
+        //{
+            a1.Position += Vector3.Normalize(a1.Position - p) * Mathf.Max(0, 2.0f * minDistance - distance);
+        //}
+    }
 
-    //        return true;
-    //    }
+    void resolveObstacleCollision(Agent a1, Vector3 p)
+    {
+        Vector3 agentPosition = a1.Position;
 
-    //    return false;
-    //}
+        float distanceX = Mathf.Abs(agentPosition.x - p.x);
+        float distanceZ = Mathf.Abs(agentPosition.z - p.z);
 
-    //void resolveObstacleCollision(Agent a1, Vector3 p)
-    //{
-    //    Vector3 agentPosition = a1.Position;
-
-    //    float distanceX = Mathf.Abs(agentPosition.x - p.x);
-    //    float distanceZ = Mathf.Abs(agentPosition.z - p.z);
-
-    //    if (distanceX < minDistance && distanceZ < minDistance)
-    //    {
-    //        if (distanceX > distanceZ)
-    //            agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * (minDistance - distanceX);
-    //        else
-    //            agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * (minDistance - distanceZ);
-    //        a1.Position = agentPosition;
-    //    }
-    //}
+        //if (distanceX < minDistance && distanceZ < minDistance)
+        //{
+            if (distanceX > distanceZ)
+                agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * Mathf.Max(0, 2.0f * minDistance - distanceX);
+            else
+                agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * Mathf.Max(0, 2.0f * minDistance - distanceZ);
+            a1.Position = agentPosition;
+        //}
+    }
 
     //static int CompareAgentsByPosition(Agent a1, Agent a2)
     //{

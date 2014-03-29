@@ -28,14 +28,14 @@ public class SceneManager : MonoBehaviour
 
     void Update()
     {
-        //float x = Input.GetAxisRaw("Horizontal") * 5.0f;
-        //float y = Input.GetAxisRaw("Vertical") * 5.0f;
+        float x = Input.GetAxisRaw("Horizontal") * 5.0f;
+        float y = Input.GetAxisRaw("Vertical") * 5.0f;
 
-        //testAgent.Velocity = new Vector3(x, 0.0f, y);
+        testAgent.Velocity = new Vector3(x, 0.0f, y);
 
         for (int i = 0; i < agentManager.GetAgentCount(); ++i)
         {
-            agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
+            //agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
         }
     }
 

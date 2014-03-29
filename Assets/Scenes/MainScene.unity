@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7be515ebfba2a4d4f8e155352152536d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapTexture: {fileID: 2800000, guid: 38607f9ff6727df47b1cfed76e917d5a, type: 3}
+  mapTexture: {fileID: 2800000, guid: fbe1817afaf68034fbde0c0c9fd97617, type: 3}
 --- !u!114 &1691294592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -227,7 +227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556d970b54ddb4a4daaecc3e04d9ae19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 50
+  agentCount: 10
   minDistance: .5
   maxVelocity: 2
   agentPrefab: {fileID: 100000, guid: 7e7f46137cd82dc488171ed460e61ffb, type: 2}
