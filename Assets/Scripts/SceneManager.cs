@@ -25,22 +25,23 @@ public class SceneManager : MonoBehaviour
         obstacles = FindObjectsOfType<Obstacle>();
 
         testAgent = agentManager.GetAgent(0);
+        agentManager.GetAgent(0).controlled = true;
     }
 
     void Update()
     {
-        float x = Input.GetAxisRaw("Horizontal") * 5.0f;
-        float y = Input.GetAxisRaw("Vertical") * 5.0f;
+        //float x = Input.GetAxisRaw("Horizontal") * 5.0f;
+        //float y = Input.GetAxisRaw("Vertical") * 5.0f;
 
-        testAgent.Velocity = new Vector3(x, 0.0f, y);
+        //testAgent.NetForce += new Vector3(x, 0.0f, y);
 
-        for (int i = 0; i < agentManager.GetAgentCount(); ++i)
-        {
-            //if (Vector3.Distance(agentManager.GetAgent(i).Target, agentManager.GetAgent(i).Position) > 0.5f)
-            //    agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
-            //else
-            //    agentManager.GetAgent(i).Velocity = Vector3.zero;
-        }
+        //for (int i = 0; i < agentManager.GetAgentCount(); ++i)
+        //{
+        //    //if (Vector3.Distance(agentManager.GetAgent(i).Target, agentManager.GetAgent(i).Position) > 0.5f)
+        //    //    agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
+        //    //else
+        //    //    agentManager.GetAgent(i).Velocity = Vector3.zero;
+        //}
     }
 
     void LateUpdate()

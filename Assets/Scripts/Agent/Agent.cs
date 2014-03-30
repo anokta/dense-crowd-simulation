@@ -4,8 +4,11 @@ using System.Collections.Generic;
 
 public class Agent : MonoBehaviour
 {
+    static float elasticity = 1.0f;
     static float kThresh = 0.5f;
     static float degreeThresh = 30.0f;
+
+    public bool controlled; 
 
     Transform agentTransform;
 
@@ -83,33 +86,46 @@ public class Agent : MonoBehaviour
             Vector3 fConstraint = netForce.normalized;
             float fEquals = Vector3.Dot(fConstraint, vForce);
 
-            double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
-            double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
-            double[] v;
-            double[,] c = { { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z } };
-            int[] ct = { 1 };
+            //double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
+            //double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
+            //double[] v;
+            //double[,] c = { { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z } };
+            //int[] ct = { 1 };
 
-            alglib.minqpstate state;
-            alglib.minqpreport rep;
+            //alglib.minqpstate state;
+            //alglib.minqpreport rep;
 
-            alglib.minqpcreate(2, out state);
-            alglib.minqpsetquadraticterm(state, a);
-            alglib.minqpsetlinearterm(state, b);
-            alglib.minqpsetlc(state, c, ct);
-            
-            alglib.minqpoptimize(state);
-            alglib.minqpresults(state, out v, out rep);
+            //alglib.minqpcreate(2, out state);
+            //alglib.minqpsetquadraticterm(state, a);
+            //alglib.minqpsetlinearterm(state, b);
+            //alglib.minqpsetlc(state, c, ct);
 
-            if (rep.terminationtype == 4 || rep.terminationtype == 7)
-            {
-                velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
-            }
+            //alglib.minqpoptimize(state);
+            //alglib.minqpresults(state, out v, out rep);
+
+            //if (rep.terminationtype == 4 || rep.terminationtype == 7)
+            //{
+            //    velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
+            //}
+            //else
+
+                velocity = vForce;
+        }
+        else
+            velocity = vPref;
+
+        if (controlled)
+        {
+            float x = Input.GetAxisRaw("Horizontal") * 5.0f;
+            float y = Input.GetAxisRaw("Vertical") * 5.0f;
+
+            velocity = new Vector3(x, 0.0f, y);
         }
 
         if (velocity.sqrMagnitude > 0)
             agentTransform.rotation = Quaternion.LookRotation(velocity);
 
-        agentTransform.position += Velocity.normalized * MaxVelocity * Time.deltaTime;
+        agentTransform.position += Velocity * Time.deltaTime;
 
         netForce = Vector3.zero;
     }
@@ -118,9 +134,7 @@ public class Agent : MonoBehaviour
     {
         for (int i = 0; i < agents.Count; ++i)
         {
-            Vector3 normal = agents[i].Position - Position;
-
-            Vector3 pushForce = normal * Vector3.Dot(agents[i].Position * (1.0f / agents.Count), (agents[i].Position - (Position + Velocity * Time.deltaTime)).normalized);
+            Vector3 pushForce = (1.0f / agents.Count) * Vector3.Scale(agents[i].Position, (agents[i].Position - (Position + Velocity * Time.deltaTime)).normalized);
 
             agents[i].NetForce += pushForce;
         }
@@ -128,8 +142,6 @@ public class Agent : MonoBehaviour
 
     public void ResolveAgentCollisions(List<Agent> agents)
     {
-        float elasticity = 1.0f;
-
         for (int i = 0; i < agents.Count; ++i)
         {
             Vector3 vRelative = velocity - agents[i].Velocity;
@@ -142,6 +154,18 @@ public class Agent : MonoBehaviour
                 netForce += collisionForce;
                 agents[i].NetForce -= collisionForce;
             }
+        }
+    }
+
+    public void ResolveObjectCollision(Vector3 position)
+    {
+        Vector3 normal = Position - position;
+
+        if (Vector3.Dot(velocity, normal) < 0)
+        {
+            Vector3 collisionForce = normal * Vector3.Dot((-(1.0f + elasticity) * velocity) / (1.0f / mass), normal) / Time.deltaTime;
+
+            netForce += collisionForce;
         }
     }
 

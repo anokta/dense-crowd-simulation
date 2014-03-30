@@ -64,15 +64,21 @@ public class AgentManager : MonoBehaviour
                                 {
                                     collidedNeighbors.Add(neighbor);
                                 }
-                                //else if (Vector3.Dot(agents[i].transform.forward, (neighbor.Position - agents[i].Position).normalized) < Mathf.Cos(Mathf.Deg2Rad * viewAngle)) // push
-                                //{
-                                //    Debug.Log("PUSH");
-                                //    neighbors.Add(neighbor);
-                                //}
+                                else
+                                {
+                                    if (Mathf.Acos(Vector3.Dot(agents[i].transform.forward, (neighbor.Position - agents[i].Position).normalized)) < Mathf.Deg2Rad * viewAngle) // push
+                                    {
+                                        neighbors.Add(neighbor);
+                                    }
+                                }
 
                                 break;
                             case "Obstacle":
-                                resolveObstacleCollision(agents[i], hits[j].transform.position);
+                                Vector3 obstaclePosition = hits[j].transform.position;
+                                if (Vector3.Distance(agents[i].Position, obstaclePosition) < 2.0f * minDistance) // collision
+                                {
+                                    agents[i].ResolveObjectCollision(obstaclePosition);
+                                }
                                 break;
                         }
                     }
@@ -80,8 +86,8 @@ public class AgentManager : MonoBehaviour
 
                 agents[i].PushAgents(neighbors);
                 agents[i].ResolveAgentCollisions(collidedNeighbors);
-                agents[i].CalculateDeceleration(neighbors);
-                agents[i].CalculateResistive(neighbors);
+                //agents[i].CalculateDeceleration(neighbors);
+                //agents[i].CalculateResistive(neighbors);
             }
         }
     }
