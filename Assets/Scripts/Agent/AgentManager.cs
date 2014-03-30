@@ -53,7 +53,7 @@ public class AgentManager : MonoBehaviour
 
                 for (int j = 0; j < hits.Length; ++j)
                 {
-                    if (hits[j] != agents[i].collider)
+                    if (hits[j].GetInstanceID() != agents[i].GetInstanceID())
                     {
                         switch (hits[j].transform.tag)
                         {
@@ -64,10 +64,11 @@ public class AgentManager : MonoBehaviour
                                 {
                                     collidedNeighbors.Add(neighbor);
                                 }
-                                else if (Vector3.Dot(agents[i].transform.forward, hits[j].transform.forward) < viewAngle) // push
-                                {
-                                    neighbors.Add(neighbor);
-                                }
+                                //else if (Vector3.Dot(agents[i].transform.forward, (neighbor.Position - agents[i].Position).normalized) < Mathf.Cos(Mathf.Deg2Rad * viewAngle)) // push
+                                //{
+                                //    Debug.Log("PUSH");
+                                //    neighbors.Add(neighbor);
+                                //}
 
                                 break;
                             case "Obstacle":
@@ -79,18 +80,10 @@ public class AgentManager : MonoBehaviour
 
                 agents[i].PushAgents(neighbors);
                 agents[i].ResolveAgentCollisions(collidedNeighbors);
+                agents[i].CalculateDeceleration(neighbors);
+                agents[i].CalculateResistive(neighbors);
             }
         }
-    }
-
-    void resolveAgentCollision(Agent a1, Vector3 p)
-    {
-        float distance = Vector3.Distance(a1.Position, p);
-
-        ///if (distance < minDistance)
-        //{
-        a1.Position += Vector3.Normalize(a1.Position - p) * Mathf.Max(0, 2.0f * minDistance - distance);
-        //}
     }
 
     void resolveObstacleCollision(Agent a1, Vector3 p)
@@ -109,15 +102,4 @@ public class AgentManager : MonoBehaviour
         a1.Position = agentPosition;
         //}
     }
-
-    //static int CompareAgentsByPosition(Agent a1, Agent a2)
-    //{
-    //    float diff = a1.Position.sqrMagnitude - a2.Position.sqrMagnitude;
-    //    if (diff < 0)
-    //        return -1;
-    //    else if (diff > 0)
-    //        return 1;
-    //    else
-    //        return 0;
-    //}
 }

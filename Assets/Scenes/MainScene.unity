@@ -227,10 +227,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556d970b54ddb4a4daaecc3e04d9ae19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 4
+  agentCount: 100
   minDistance: .5
   maxVelocity: 4
-  viewAngle: 60
+  viewAngle: 120
   agentPrefab: {fileID: 100002, guid: 03452c56c1e56c84397337ba201f11f8, type: 2}
 --- !u!1 &1994872892
 GameObject:
