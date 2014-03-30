@@ -45,7 +45,7 @@ public class AgentManager : MonoBehaviour
     {
         for (int i = 0; i < agentCount; ++i)
         {
-            Collider[] hits = Physics.OverlapSphere(agents[i].Position, 4.0f * minDistance);
+            Collider[] hits = Physics.OverlapSphere(agents[i].Position, 3.0f * minDistance);
             if (hits.Length > 0)
             {
                 List<Agent> neighbors = new List<Agent>();
@@ -86,26 +86,9 @@ public class AgentManager : MonoBehaviour
 
                 agents[i].PushAgents(neighbors);
                 agents[i].ResolveAgentCollisions(collidedNeighbors);
-                //agents[i].CalculateDeceleration(neighbors);
+                agents[i].CalculateDeceleration(neighbors);
                 //agents[i].CalculateResistive(neighbors);
             }
         }
-    }
-
-    void resolveObstacleCollision(Agent a1, Vector3 p)
-    {
-        Vector3 agentPosition = a1.Position;
-
-        float distanceX = Mathf.Abs(agentPosition.x - p.x);
-        float distanceZ = Mathf.Abs(agentPosition.z - p.z);
-
-        //if (distanceX < minDistance && distanceZ < minDistance)
-        //{
-        if (distanceX > distanceZ)
-            agentPosition.x += Mathf.Sign(agentPosition.x - p.x) * Mathf.Max(0, 2.0f * minDistance - distanceX);
-        else
-            agentPosition.z += Mathf.Sign(agentPosition.z - p.z) * Mathf.Max(0, 2.0f * minDistance - distanceZ);
-        a1.Position = agentPosition;
-        //}
     }
 }

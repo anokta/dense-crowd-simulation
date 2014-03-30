@@ -5,8 +5,10 @@ using System.Collections.Generic;
 public class Agent : MonoBehaviour
 {
     static float elasticity = 1.0f;
-    static float kThresh = 0.5f;
-    static float degreeThresh = 30.0f;
+    static float kThresh = 0.1f;
+
+    static float degreeThreshD = 30.0f;
+    static float degreeThreshR = 60.0f;
 
     public bool controlled; 
 
@@ -108,11 +110,10 @@ public class Agent : MonoBehaviour
             //    velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
             //}
             //else
-
                 velocity = vForce;
         }
         else
-            velocity = vPref;
+            
 
         if (controlled)
         {
@@ -121,8 +122,10 @@ public class Agent : MonoBehaviour
 
             velocity = new Vector3(x, 0.0f, y);
         }
+        else
+            velocity = vPref;
 
-        if (velocity.sqrMagnitude > 0)
+        if (velocity.sqrMagnitude > 0.0f)
             agentTransform.rotation = Quaternion.LookRotation(velocity);
 
         agentTransform.position += Velocity * Time.deltaTime;
@@ -171,36 +174,52 @@ public class Agent : MonoBehaviour
 
     public void CalculateDeceleration(List<Agent> agents)
     {
-        if (Vector3.Dot((velocity - previousVelocity).normalized, velocity.normalized) < -Mathf.Cos(Mathf.Deg2Rad * degreeThresh))
+        Vector3 velocityDelta = velocity - previousVelocity;
+
+        if (Vector3.Dot(velocityDelta.normalized, velocity.normalized) < -Mathf.Cos(Mathf.Deg2Rad * degreeThreshD))
         {
-            Vector3 decelerationForce = kThresh * mass * (velocity - previousVelocity) / Time.deltaTime;
+            Vector3 decelerationForce = kThresh * mass * velocityDelta / Time.deltaTime;
 
             netForce += decelerationForce;
 
+            List<Agent> interactingAgents = new List<Agent>();
+
             for (int i = 0; i < agents.Count; ++i)
             {
-                if (Vector3.Dot(previousVelocity.normalized, (agents[i].Position - Position).normalized) < Mathf.Cos(2.0f * Mathf.Deg2Rad * degreeThresh))
+                if (Mathf.Acos(Vector3.Dot(previousVelocity.normalized, (agents[i].Position - Position).normalized)) < 2.0f * Mathf.Deg2Rad * degreeThreshD)
                 {
-                    agents[i].NetForce -= 1.0f / agents.Count * decelerationForce;
+                    interactingAgents.Add(agents[i]);
                 }
+            }
+
+            for (int i = 0; i < interactingAgents.Count; ++i)
+            {
+                interactingAgents[i].NetForce -= 1.0f / interactingAgents.Count * decelerationForce;
             }
         }
     }
 
     public void CalculateResistive(List<Agent> agents)
     {
-        if (VForce.sqrMagnitude > 0.0f)
+        if (vForce.sqrMagnitude > 0.0f)
         {
             Vector3 resistiveForce = kThresh * mass * (velocity - vForce) / Time.deltaTime;
 
             netForce += resistiveForce;
 
+            List<Agent> interactingAgents = new List<Agent>();
+
             for (int i = 0; i < agents.Count; ++i)
             {
-                if (Vector3.Dot(previousVelocity.normalized, (agents[i].Position - Position).normalized) < Mathf.Cos(2.0f * Mathf.Deg2Rad * degreeThresh))
+                if (Mathf.Acos(Vector3.Dot(previousVelocity.normalized, (agents[i].Position - Position).normalized)) < 2.0f * Mathf.Deg2Rad * degreeThreshR)
                 {
-                    agents[i].NetForce -= 1.0f / agents.Count * resistiveForce;
+                    interactingAgents.Add(agents[i]);
                 }
+            }
+
+            for (int i = 0; i < interactingAgents.Count; ++i)
+            {
+                agents[i].NetForce -= 1.0f / agents.Count * resistiveForce;
             }
         }
     }
