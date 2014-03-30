@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Agent : MonoBehaviour
 {
-    static float elasticity = 1.0f;
+    static float elasticity = 0.75f;
     static float kThresh = 0.1f;
 
     static float degreeThreshD = 30.0f;
@@ -79,7 +79,10 @@ public class Agent : MonoBehaviour
 
     void Update()
     {
-        Vector3 vPref = new Vector3(); // (target - Position).normalized * maxVelocity;
+        Vector3 vPref =  (target - Position).normalized * maxVelocity;
+        if ((target - Position).magnitude < 0.1f)
+            vPref = Vector3.zero;
+
 
         vForce = velocity + netForce / mass * Time.deltaTime;
 
@@ -88,11 +91,11 @@ public class Agent : MonoBehaviour
             Vector3 fConstraint = netForce.normalized;
             float fEquals = Vector3.Dot(fConstraint, vForce);
 
-            //double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
-            //double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
-            //double[] v;
-            //double[,] c = { { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z } };
-            //int[] ct = { 1 };
+            double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
+            double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
+            double[] v;
+            double[,] c = { { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z } };
+            int[] ct = { 1 };
 
             //alglib.minqpstate state;
             //alglib.minqpreport rep;
@@ -123,7 +126,7 @@ public class Agent : MonoBehaviour
             velocity = new Vector3(x, 0.0f, y);
         }
         else
-            velocity = vPref;
+            velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
 
         if (velocity.sqrMagnitude > 0.0f)
             agentTransform.rotation = Quaternion.LookRotation(velocity);
@@ -162,7 +165,7 @@ public class Agent : MonoBehaviour
 
     public void ResolveObjectCollision(Vector3 position)
     {
-        Vector3 normal = Position - position;
+        Vector3 normal = (Position - position).normalized;
 
         if (Vector3.Dot(velocity, normal) < 0)
         {
@@ -221,6 +224,24 @@ public class Agent : MonoBehaviour
             {
                 agents[i].NetForce -= 1.0f / agents.Count * resistiveForce;
             }
+        }
+    }
+
+    public void AvoidAgent(Agent agent)
+    {
+
+    }
+
+    public void AvoidObstacle(Collider c)
+    {
+        Vector3 direction = (velocity - (c.transform.position - Position)).normalized;
+
+        Vector3 u = Vector3.zero;
+
+        bool colliding = true;
+        while (colliding)
+        {
+            
         }
     }
 }

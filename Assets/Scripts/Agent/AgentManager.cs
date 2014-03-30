@@ -55,31 +55,32 @@ public class AgentManager : MonoBehaviour
                 {
                     if (hits[j].GetInstanceID() != agents[i].GetInstanceID())
                     {
-                        switch (hits[j].transform.tag)
+                        Vector3 p = hits[j].transform.position;
+
+                        if (Vector3.Distance(agents[i].Position, p) < 2.0f * minDistance) // collision
                         {
-                            case "Agent":
-                                Agent neighbor = hits[j].GetComponent<Agent>();
-
-                                if (Vector3.Distance(agents[i].Position, neighbor.Position) < 2.0f * minDistance) // collision
-                                {
-                                    collidedNeighbors.Add(neighbor);
-                                }
-                                else
-                                {
-                                    if (Mathf.Acos(Vector3.Dot(agents[i].transform.forward, (neighbor.Position - agents[i].Position).normalized)) < Mathf.Deg2Rad * viewAngle) // push
-                                    {
-                                        neighbors.Add(neighbor);
-                                    }
-                                }
-
-                                break;
-                            case "Obstacle":
-                                Vector3 obstaclePosition = hits[j].transform.position;
-                                if (Vector3.Distance(agents[i].Position, obstaclePosition) < 2.0f * minDistance) // collision
-                                {
-                                    agents[i].ResolveObjectCollision(obstaclePosition);
-                                }
-                                break;
+                            switch (hits[j].transform.tag)
+                            {
+                                case "Agent":
+                                    collidedNeighbors.Add(hits[j].GetComponent<Agent>());
+                                    break;
+                                case "Obstacle":
+                                    agents[i].ResolveObjectCollision(p);
+                                    break;
+                            }
+                        }
+                        else if (Mathf.Acos(Vector3.Dot(agents[i].transform.forward, (p - agents[i].Position).normalized)) < Mathf.Deg2Rad * viewAngle) // anticipatory (avoidance)
+                        {
+                            switch (hits[j].transform.tag)
+                            {
+                                case "Agent":
+                                    neighbors.Add(hits[j].GetComponent<Agent>());
+                                    agents[i].AvoidAgent(hits[j].GetComponent<Agent>());
+                                    break;
+                                case "Obstacle":
+                                    agents[i].AvoidObstacle(hits[j]);
+                                    break;
+                            }
                         }
                     }
                 }
