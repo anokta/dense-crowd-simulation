@@ -58,8 +58,6 @@ public class SimplexSolver
     {
         int numRows = simplex.Count;
         int numCols = simplex[0].Count;
-        int numVariables = numCols - numRows - 1;
-
 
         noSolution = false;
 

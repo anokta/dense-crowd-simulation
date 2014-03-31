@@ -32,18 +32,27 @@ public class AgentManager : MonoBehaviour
 
         for (int i = 1; i < agentCount; ++i)
         {
-            agents[i].Position = new Vector3(10.0f + (i % 30) * 2.5f, 0.0f, 10.0f + (i / 30) * 2.5f);
+            agents[i].Position = new Vector3(20.0f + (i % 30) * 2.5f, 0.0f, 20.0f + (i / 30) * 2.5f);
+            agents[i].Target = agents[i].Position;
         }
-        agents[0].Position = new Vector3(40.0f, 0.0f, 2.5f);
+        agents[0].Position = new Vector3(55.5f, 0.0f, 10.0f);
+        agents[0].Target = agents[0].Position;
     }
 
     public void RestartScene()
     {
+        ClearAgentList();
+
         GameObject container = GameObject.Find("Agents");
         if (container != null)
             Destroy(container.gameObject);
 
         LoadAgentsIntoScene();
+    }
+
+    public void ClearAgentList()
+    {
+        agents.Clear();
     }
 
     public int GetAgentCount()
@@ -56,9 +65,9 @@ public class AgentManager : MonoBehaviour
         return agents[i];
     }
 
-    public void ResolveCollision(Obstacle[] obstacles)
+    public void ResolveCollision()
     {
-        for (int i = 0; i < agentCount; ++i)
+        for (int i = 0; i < agents.Count; ++i)
         {
             Collider[] hits = Physics.OverlapSphere(agents[i].Position, 3.0f * minDistance);
             if (hits.Length > 0)

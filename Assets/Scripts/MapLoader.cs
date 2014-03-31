@@ -14,20 +14,22 @@ public class MapLoader : MonoBehaviour
         height = mapTexture.height;
 
         Camera.main.transform.position = new Vector3((width-1)/2.0f, Mathf.Max(width, height), (height-1) /2.0f);
+        Camera.main.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
 
         map = new bool[height, width];
-        
-        Transform entityContainer = GameObject.Find("20 Entities").transform;
+
+        Transform mapContainer = new GameObject("Map").transform;
+        mapContainer.parent = GameObject.Find("20 Entities").transform;
 
         // Instantiate the ground
         GameObject ground = GameObject.Instantiate(groundPrefab) as GameObject;
         ground.transform.localScale = new Vector3(width / 1.0f, groundPrefab.transform.localScale.y, height / 1.0f);
         ground.transform.position = new Vector3(Camera.main.transform.position.x, groundPrefab.transform.position.y, Camera.main.transform.position.z);
-        ground.transform.parent = entityContainer;
+        ground.transform.parent = mapContainer;
 
         // Instantiate the obstacle
         Transform obstacleContainer = new GameObject("Obstacles").transform;
-        obstacleContainer.parent = entityContainer;
+        obstacleContainer.parent = mapContainer;
 
         for (int y = 0; y < height; ++y)
         {

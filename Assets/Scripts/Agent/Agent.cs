@@ -10,6 +10,8 @@ public class Agent : MonoBehaviour
     static float degreeThreshD = 30.0f;
     static float degreeThreshR = 60.0f;
 
+    public static bool targetToggle = false;
+
     public bool controlled;
 
     Transform agentTransform;
@@ -87,14 +89,23 @@ public class Agent : MonoBehaviour
     void Update()
     {
         Vector3 vPref = (target - Position).normalized * 0.5f * maxVelocity;
-        //  if ((target - Position).magnitude < 1.5f)
+        if (!targetToggle || (target - Position).magnitude < 1.5f)
             vPref = Vector3.zero;
 
-
         vForce = velocity + netForce / mass * Time.deltaTime;
-        if (netForce.sqrMagnitude > 0)
+        if (netForce.sqrMagnitude > 0 || uObstacle.Count > 0)
+        {
             Velocity = vForce;
 
+            if (uObstacle.Count > 0)
+            {
+                for (int i = 0; i < uObstacle.Count; ++i)
+                {
+                    if(uObstacle[i].sqrMagnitude > 0)
+                        Velocity = velocity + uObstacle[i];
+                }
+            }
+        }
         //if (netForce.sqrMagnitude > 0 || uAgent.Count > 0 || uObstacle.Count > 0)
         //{
         //    List<double[]> lcs = new List<double[]>();

@@ -5,60 +5,66 @@ using System.Collections.Generic;
 
 public class SceneManager : MonoBehaviour
 {
-    public Texture2D mapTexture;
+    public Texture2D[] mapTextures;
     
     MapLoader mapLoader;
     AgentManager agentManager;
 
-    Obstacle[] obstacles;
-
-    Agent testAgent;
+    public static int sceneNumber = 0;
 
     void Start()
     {
+        sceneNumber = 0;
+
         mapLoader = GetComponent<MapLoader>();
-        mapLoader.LoadMapIntoScene(mapTexture);
+        mapLoader.LoadMapIntoScene(mapTextures[sceneNumber]);
 
         agentManager = GetComponent<AgentManager>();
         agentManager.LoadAgentsIntoScene();
-
-        obstacles = FindObjectsOfType<Obstacle>();
-
-        testAgent = agentManager.GetAgent(0);
         agentManager.GetAgent(0).controlled = true;
         agentManager.GetAgent(0).renderer.material.color = Color.cyan;
         agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
     }
 
-    void Update()
-    {
-        //float x = Input.GetAxisRaw("Horizontal") * 5.0f;
-        //float y = Input.GetAxisRaw("Vertical") * 5.0f;
-
-        //testAgent.NetForce += new Vector3(x, 0.0f, y);
-
-        //for (int i = 0; i < agentManager.GetAgentCount(); ++i)
-        //{
-        //    //if (Vector3.Distance(agentManager.GetAgent(i).Target, agentManager.GetAgent(i).Position) > 0.5f)
-        //    //    agentManager.GetAgent(i).Velocity = agentManager.GetAgent(i).Target - agentManager.GetAgent(i).Position;
-        //    //else
-        //    //    agentManager.GetAgent(i).Velocity = Vector3.zero;
-        //}
-    }
-
     void OnGUI()
     {
-        if(GUI.Button(new Rect(50, 50, 150, 75), "Reset"))
+        if(GUI.Button(new Rect(25, 50, 150, 75), "Reset"))
         {
             agentManager.RestartScene();
             agentManager.GetAgent(0).controlled = true;
             agentManager.GetAgent(0).renderer.material.color = Color.cyan;
             agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
         }
+        else if (GUI.Button(new Rect(25, 150, 150, 75), sceneNumber == 0 ? "Load Obstacles" : "Remove Obstacles"))
+        {
+            LoadTScene(1 - sceneNumber);
+        }
+        else if (GUI.Button(new Rect(25, 250, 150, 75), "Set Random Targets"))
+        {
+            agentManager.SetRandomTargets();
+        }
+        else if (GUI.Button(new Rect(50, 350, 125, 50), Agent.targetToggle ? "Follow Target ON" : "Follow Target OFF"))
+        {
+            Agent.targetToggle = !Agent.targetToggle;
+        }
     }
 
     void LateUpdate()
     {
-        agentManager.ResolveCollision(obstacles);
+        agentManager.ResolveCollision();
+    }
+
+    void LoadTScene(int index)
+    {
+        sceneNumber = index;
+
+        Destroy(GameObject.Find("Map"));
+        mapLoader.LoadMapIntoScene(mapTextures[sceneNumber]);
+
+        agentManager.RestartScene();
+
+        agentManager.GetAgent(0).controlled = true;
+        agentManager.GetAgent(0).renderer.material.color = Color.cyan;
+        agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
     }
 }
