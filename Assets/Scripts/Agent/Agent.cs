@@ -10,7 +10,7 @@ public class Agent : MonoBehaviour
     static float degreeThreshD = 30.0f;
     static float degreeThreshR = 60.0f;
 
-    public bool controlled; 
+    public bool controlled;
 
     Transform agentTransform;
 
@@ -68,6 +68,9 @@ public class Agent : MonoBehaviour
         set { vForce = value; }
     }
 
+    List<Vector3> uObstacle, nObstacle;
+    List<Vector3> uAgent;
+
     void Awake()
     {
         mass = 1.0f;
@@ -75,65 +78,113 @@ public class Agent : MonoBehaviour
         agentTransform = transform;
 
         target = new Vector3(Random.Range(0.0f, 100.0f), 0.0f, Random.Range(0.0f, 100.0f));
+
+        uAgent = new List<Vector3>();
+        uObstacle = new List<Vector3>();
+        nObstacle = new List<Vector3>();
     }
 
     void Update()
     {
-        Vector3 vPref =  (target - Position).normalized * maxVelocity;
-        if ((target - Position).magnitude < 0.1f)
+        Vector3 vPref = (target - Position).normalized * 0.5f * maxVelocity;
+          if ((target - Position).magnitude < 1.5f)
             vPref = Vector3.zero;
 
 
         vForce = velocity + netForce / mass * Time.deltaTime;
 
-        if (netForce.sqrMagnitude > 0)
+        if (netForce.sqrMagnitude > 0 || uAgent.Count > 0 || uObstacle.Count > 0)
         {
+            List<double[]> lcs = new List<double[]>();
+
             Vector3 fConstraint = netForce.normalized;
             float fEquals = Vector3.Dot(fConstraint, vForce);
 
             double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
             double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
             double[] v;
-            double[,] c = { { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z } };
-            int[] ct = { 1 };
+            double[] fc = { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z };
 
-            //alglib.minqpstate state;
-            //alglib.minqpreport rep;
+            alglib.minqpstate state;
+            alglib.minqpreport rep;
 
-            //alglib.minqpcreate(2, out state);
-            //alglib.minqpsetquadraticterm(state, a);
-            //alglib.minqpsetlinearterm(state, b);
-            //alglib.minqpsetlc(state, c, ct);
+            alglib.minqpcreate(2, out state);
+            alglib.minqpsetquadraticterm(state, a);
+            alglib.minqpsetlinearterm(state, b);
 
-            //alglib.minqpoptimize(state);
-            //alglib.minqpresults(state, out v, out rep);
+            if (netForce.sqrMagnitude > 0)
+                lcs.Add(fc);
 
-            //if (rep.terminationtype == 4 || rep.terminationtype == 7)
-            //{
-            //    velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
-            //}
-            //else
-                velocity = vForce;
+            if (uAgent.Count > 0)
+            {
+                for (int i = 0; i < uAgent.Count; ++i)
+                {
+                    Vector3 uNorm = uAgent[i].normalized;
+                    double[] orca1c = { uNorm.x, uNorm.z, (velocity.x + 0.5f * uAgent[i].x) * uNorm.x + (velocity.z + 0.5f * uAgent[i].z) * uNorm.z };
+                    lcs.Add(orca1c);
+                }
+            }
+            if (uObstacle.Count > 0)
+            {
+                for (int i = 0; i < uObstacle.Count; ++i)
+                {
+                    double[] orca2c = { nObstacle[i].x, nObstacle[i].z, (velocity.x + uObstacle[i].x) * nObstacle[i].x + (velocity.z + uObstacle[i].z) * nObstacle[i].z };
+                    lcs.Add(orca2c);
+                }
+            }
+
+            double [,] lc = new double[lcs.Count, 3];
+            int[] ct = new int[lcs.Count];
+            for(int i=0; i<lcs.Count; ++i)
+            {
+                for(int j=0; j<3; ++j)
+                    lc[i, j] = lcs[i][j];
+
+                ct[i] = 1;
+            }
+
+            alglib.minqpsetlc(state, lc, ct);
+
+            alglib.minqpoptimize(state);
+            alglib.minqpresults(state, out v, out rep);
+
+            if (rep.terminationtype == 4 || rep.terminationtype == 7)
+            {
+                Velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
+            }
+            else
+            {
+                Velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
+
+            }
         }
         else
-            
+        {
+            Velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
+        }
+        //else
 
         if (controlled)
         {
             float x = Input.GetAxisRaw("Horizontal") * 5.0f;
             float y = Input.GetAxisRaw("Vertical") * 5.0f;
 
-            velocity = new Vector3(x, 0.0f, y);
+            if(x != 0.0f || y != 0.0f)
+                Velocity = new Vector3(x, 0.0f, y);
         }
-        else
-            velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
+            //else
+            //    velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
 
-        if (velocity.sqrMagnitude > 0.0f)
+        if (velocity.sqrMagnitude > 0.1f)
             agentTransform.rotation = Quaternion.LookRotation(velocity);
 
-        agentTransform.position += Velocity * Time.deltaTime;
+        agentTransform.position += Vector3.Max(new Vector3(-maxVelocity, -maxVelocity, -maxVelocity), Vector3.Min(new Vector3(maxVelocity, maxVelocity, maxVelocity), velocity)) * Time.deltaTime;
 
         netForce = Vector3.zero;
+
+        uAgent.Clear();
+        uObstacle.Clear();
+        nObstacle.Clear();
     }
 
     public void PushAgents(List<Agent> agents)
@@ -230,18 +281,69 @@ public class Agent : MonoBehaviour
     public void AvoidAgent(Agent agent)
     {
 
+        CalculateMinimumAvoidanceVector(agent.Position, agent.Velocity, false);
     }
 
     public void AvoidObstacle(Collider c)
     {
-        Vector3 direction = (velocity - (c.transform.position - Position)).normalized;
 
-        Vector3 u = Vector3.zero;
+        CalculateMinimumAvoidanceVector(c.transform.position);
+    }
 
-        bool colliding = true;
-        while (colliding)
+
+    void CalculateMinimumAvoidanceVector(Vector3 p, Vector3 v = default(Vector3), bool obstacle = true)
+    {
+        Vector3 relativePosition = p - Position;
+        Vector3 relativeVelocity = velocity - v;
+        float distSq = relativePosition.sqrMagnitude;
+        float combinedRadius = 1.0f;// obstacle ? 2.0f : 1.0f;
+        float combinedRadiusSq = 1.0f;// obstacle ? 4.0f : 1.0f;
+        float interpolateAmount = 0.2f;
+
+        if (!Physics.Raycast(Position, velocity, relativePosition.magnitude + combinedRadius))
         {
-            
+            return;
+        }
+
+        Vector3 u;
+
+        Vector3 w = relativeVelocity - interpolateAmount * relativePosition;
+        float wLengthSq = w.sqrMagnitude;
+
+        float dotProduct1 = Vector3.Dot(w, relativePosition);
+
+        if (dotProduct1 < 0.0f && dotProduct1 * dotProduct1 > combinedRadiusSq * wLengthSq)
+        {
+            u = (combinedRadius * interpolateAmount - w.magnitude) * w.normalized;
+        }
+        else
+        {
+            float leg = Mathf.Sqrt(distSq - combinedRadiusSq);
+
+            Vector3 direction;
+
+            if ((relativePosition.x * w.z - relativePosition.z * w.x) > 0.0f)
+            {
+                direction = new Vector3(relativePosition.x * leg - relativePosition.z * combinedRadius, 0.0f, relativePosition.x * combinedRadius + relativePosition.z * leg) / distSq;
+            }
+            else
+            {
+                direction = -new Vector3(relativePosition.x * leg + relativePosition.z * combinedRadius, 0.0f, -relativePosition.x * combinedRadius + relativePosition.z * leg) / distSq;
+            }
+
+            float dotProduct2 = Vector3.Dot(relativeVelocity, direction);
+
+            u = dotProduct2 * direction - relativeVelocity;
+        }
+
+        if (obstacle)
+        {
+            uObstacle.Add(u);
+            nObstacle.Add(-relativePosition.normalized);
+        }
+        else
+        {
+            uAgent.Add(u);
         }
     }
 }

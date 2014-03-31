@@ -24,7 +24,7 @@ public class AgentManager : MonoBehaviour
         agents = new List<Agent>();
         for (int i = 0; i < agentCount; ++i)
         {
-            GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(0.0f, 10.0f), 0.0f, Random.Range(0.0f, 10.0f)), Quaternion.identity) as GameObject;
+            GameObject agent = GameObject.Instantiate(agentPrefab, new Vector3(Random.Range(2.0f, 50.0f), 0.0f, Random.Range(2.0f, 50.0f)), Quaternion.identity) as GameObject;
             agent.transform.parent = agentContainer;
             agents.Add(agent.GetComponent<Agent>());
             agents[i].MaxVelocity = maxVelocity;
@@ -90,6 +90,14 @@ public class AgentManager : MonoBehaviour
                 agents[i].CalculateDeceleration(neighbors);
                 //agents[i].CalculateResistive(neighbors);
             }
+        }
+    }
+
+    public void SetRandomTargets()
+    {
+        foreach (Agent agent in agents)
+        {
+            agent.Target = new Vector3(Random.Range(0.0f, 100.0f), 0.0f, Random.Range(0.0f, 100.0f));
         }
     }
 }

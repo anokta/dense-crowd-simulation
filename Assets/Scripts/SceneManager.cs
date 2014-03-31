@@ -44,6 +44,14 @@ public class SceneManager : MonoBehaviour
         //}
     }
 
+    void OnGUI()
+    {
+        if(GUI.Button(new Rect(50, 50, 150, 75), "Set Random Targets"))
+        {
+            agentManager.SetRandomTargets();
+        }
+    }
+
     void LateUpdate()
     {
         agentManager.ResolveCollision(obstacles);
