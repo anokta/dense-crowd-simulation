@@ -29,6 +29,21 @@ public class AgentManager : MonoBehaviour
             agents.Add(agent.GetComponent<Agent>());
             agents[i].MaxVelocity = maxVelocity;
         }
+
+        for (int i = 1; i < agentCount; ++i)
+        {
+            agents[i].Position = new Vector3(10.0f + (i % 30) * 2.5f, 0.0f, 10.0f + (i / 30) * 2.5f);
+        }
+        agents[0].Position = new Vector3(40.0f, 0.0f, 2.5f);
+    }
+
+    public void RestartScene()
+    {
+        GameObject container = GameObject.Find("Agents");
+        if (container != null)
+            Destroy(container.gameObject);
+
+        LoadAgentsIntoScene();
     }
 
     public int GetAgentCount()
@@ -88,7 +103,7 @@ public class AgentManager : MonoBehaviour
                 agents[i].PushAgents(neighbors);
                 agents[i].ResolveAgentCollisions(collidedNeighbors);
                 agents[i].CalculateDeceleration(neighbors);
-                //agents[i].CalculateResistive(neighbors);
+                agents[i].CalculateResistive(neighbors);
             }
         }
     }

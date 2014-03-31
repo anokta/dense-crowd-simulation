@@ -21,7 +21,7 @@ public class MapLoader : MonoBehaviour
 
         // Instantiate the ground
         GameObject ground = GameObject.Instantiate(groundPrefab) as GameObject;
-        ground.transform.localScale = new Vector3(width / 10.0f, groundPrefab.transform.localScale.y, height / 10.0f);
+        ground.transform.localScale = new Vector3(width / 1.0f, groundPrefab.transform.localScale.y, height / 1.0f);
         ground.transform.position = new Vector3(Camera.main.transform.position.x, groundPrefab.transform.position.y, Camera.main.transform.position.z);
         ground.transform.parent = entityContainer;
 

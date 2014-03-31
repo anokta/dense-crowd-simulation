@@ -26,6 +26,8 @@ public class SceneManager : MonoBehaviour
 
         testAgent = agentManager.GetAgent(0);
         agentManager.GetAgent(0).controlled = true;
+        agentManager.GetAgent(0).renderer.material.color = Color.cyan;
+        agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
     }
 
     void Update()
@@ -46,9 +48,12 @@ public class SceneManager : MonoBehaviour
 
     void OnGUI()
     {
-        if(GUI.Button(new Rect(50, 50, 150, 75), "Set Random Targets"))
+        if(GUI.Button(new Rect(50, 50, 150, 75), "Reset"))
         {
-            agentManager.SetRandomTargets();
+            agentManager.RestartScene();
+            agentManager.GetAgent(0).controlled = true;
+            agentManager.GetAgent(0).renderer.material.color = Color.cyan;
+            agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
         }
     }
 

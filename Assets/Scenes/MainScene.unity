@@ -227,7 +227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 556d970b54ddb4a4daaecc3e04d9ae19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 250
+  agentCount: 600
   minDistance: .5
   maxVelocity: 5
   viewAngle: 120
