@@ -101,10 +101,18 @@ public class Agent : MonoBehaviour
             {
                 for (int i = 0; i < uObstacle.Count; ++i)
                 {
-                    if(uObstacle[i].sqrMagnitude > 0)
+                    if (uObstacle[i].sqrMagnitude > 0)
                         Velocity = velocity + uObstacle[i];
                 }
             }
+            //if (uAgent.Count > 0)
+            //{
+            //    for (int i = 0; i < uAgent.Count; ++i)
+            //    {
+            //        if (uAgent[i].sqrMagnitude > 0)
+            //            Velocity = velocity + 0.5f * uAgent[i];
+            //    }
+            //}
         }
         //if (netForce.sqrMagnitude > 0 || uAgent.Count > 0 || uObstacle.Count > 0)
         //{

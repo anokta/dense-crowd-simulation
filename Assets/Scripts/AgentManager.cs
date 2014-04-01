@@ -12,6 +12,8 @@ public class AgentManager : MonoBehaviour
 
     public GameObject agentPrefab;
 
+    public static float initialDistance = 2.5f;
+
     List<Agent> agents;
 
     public void LoadAgentsIntoScene()
@@ -32,11 +34,14 @@ public class AgentManager : MonoBehaviour
 
         for (int i = 1; i < agentCount; ++i)
         {
-            agents[i].Position = new Vector3(20.0f + (i % 30) * 2.5f, 0.0f, 20.0f + (i / 30) * 2.5f);
+            agents[i].Position = new Vector3(70.0f - initialDistance * 20.0f + (i % 30) * initialDistance, 0.0f, 20.0f + (i / 30) * initialDistance);
             agents[i].Target = agents[i].Position;
+            agents[i].renderer.material.color = agents[i].renderer.material.color + new Color(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f));
         }
-        agents[0].Position = new Vector3(55.5f, 0.0f, 10.0f);
+        agents[0].Position = new Vector3(70.0f - initialDistance * 5.5f, 0.0f, 10.0f);
         agents[0].Target = agents[0].Position;
+        agents[0].renderer.material.color = Color.white;
+        agents[0].renderer.material.mainTexture = null;
     }
 
     public void RestartScene()
@@ -121,7 +126,7 @@ public class AgentManager : MonoBehaviour
     {
         foreach (Agent agent in agents)
         {
-            agent.Target = new Vector3(Random.Range(0.0f, 100.0f), 0.0f, Random.Range(0.0f, 100.0f));
+            agent.Target = new Vector3(Random.Range(-100.0f, 250.0f), 0.0f, Random.Range(-100.0f, 250.0f));
         }
     }
 }

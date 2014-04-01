@@ -12,6 +12,9 @@ public class SceneManager : MonoBehaviour
 
     public static int sceneNumber = 0;
 
+    string textDistance = "";
+    float tempDistance = 0.0f;
+
     void Start()
     {
         sceneNumber = 0;
@@ -21,19 +24,27 @@ public class SceneManager : MonoBehaviour
 
         agentManager = GetComponent<AgentManager>();
         agentManager.LoadAgentsIntoScene();
+
         agentManager.GetAgent(0).controlled = true;
-        agentManager.GetAgent(0).renderer.material.color = Color.cyan;
-        agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
+
+        textDistance = AgentManager.initialDistance.ToString();
     }
 
     void OnGUI()
     {
+        GUI.Label(new Rect(200, 50, 150, 75), "Initial Distance");
+
+        textDistance = GUI.TextField(new Rect(200, 75, 50, 25), textDistance);
+        bool success = float.TryParse(textDistance, out tempDistance);
+        if (success)
+        {
+            AgentManager.initialDistance = Mathf.Max(0.5f, tempDistance);
+        }
+        
         if(GUI.Button(new Rect(25, 50, 150, 75), "Reset"))
         {
             agentManager.RestartScene();
             agentManager.GetAgent(0).controlled = true;
-            agentManager.GetAgent(0).renderer.material.color = Color.cyan;
-            agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
         }
         else if (GUI.Button(new Rect(25, 150, 150, 75), sceneNumber == 0 ? "Load Obstacles" : "Remove Obstacles"))
         {
@@ -47,6 +58,11 @@ public class SceneManager : MonoBehaviour
         {
             Agent.targetToggle = !Agent.targetToggle;
         }
+        else if (GUI.Button(new Rect(25, 500, 150, 50), "Exit"))
+        {
+            Application.Quit();
+        }
+
     }
 
     void LateUpdate()
@@ -64,7 +80,5 @@ public class SceneManager : MonoBehaviour
         agentManager.RestartScene();
 
         agentManager.GetAgent(0).controlled = true;
-        agentManager.GetAgent(0).renderer.material.color = Color.cyan;
-        agentManager.GetAgent(0).transform.GetChild(0).renderer.material.color = agentManager.GetAgent(0).renderer.material.color;
     }
 }
