@@ -63,13 +63,13 @@ public class Agent : MonoBehaviour
         set { netForce = value; }
     }
 
+    // Velocity constraint vectors
     Vector3 vForce;
     public Vector3 VForce
     {
         get { return vForce; }
         set { vForce = value; }
     }
-
     List<Vector3> uObstacle, nObstacle;
     List<Vector3> uAgent;
 
@@ -93,97 +93,76 @@ public class Agent : MonoBehaviour
             vPref = Vector3.zero;
 
         vForce = velocity + netForce / mass * Time.deltaTime;
-        if (netForce.sqrMagnitude > 0 || uObstacle.Count > 0)
-        {
-            Velocity = vForce;
 
+        if (netForce.sqrMagnitude > 0 || uAgent.Count > 0 || uObstacle.Count > 0)
+        {
+            List<double[]> lcs = new List<double[]>();
+
+            Vector3 fConstraint = netForce.normalized;
+            float fEquals = Vector3.Dot(fConstraint, vForce);
+
+            double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
+            double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
+            double[] v;
+            double[] fc = { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z };
+
+            alglib.minqpstate state;
+            alglib.minqpreport rep;
+
+            alglib.minqpcreate(2, out state);
+            alglib.minqpsetquadraticterm(state, a);
+            alglib.minqpsetlinearterm(state, b);
+
+            if (netForce.sqrMagnitude > 0)
+                lcs.Add(fc);
+
+            if (uAgent.Count > 0)
+            {
+                for (int i = 0; i < uAgent.Count; ++i)
+                {
+                    Vector3 uNorm = uAgent[i].normalized;
+                    double[] orca1c = { uNorm.x, uNorm.z, (velocity.x + 0.5f * uAgent[i].x) * uNorm.x + (velocity.z + 0.5f * uAgent[i].z) * uNorm.z };
+                    lcs.Add(orca1c);
+                }
+            }
             if (uObstacle.Count > 0)
             {
                 for (int i = 0; i < uObstacle.Count; ++i)
                 {
-                    if (uObstacle[i].sqrMagnitude > 0)
-                        Velocity = velocity + uObstacle[i];
+                    double[] orca2c = { nObstacle[i].x, nObstacle[i].z, (velocity.x + uObstacle[i].x) * nObstacle[i].x + (velocity.z + uObstacle[i].z) * nObstacle[i].z };
+                    lcs.Add(orca2c);
                 }
             }
-            //if (uAgent.Count > 0)
-            //{
-            //    for (int i = 0; i < uAgent.Count; ++i)
-            //    {
-            //        if (uAgent[i].sqrMagnitude > 0)
-            //            Velocity = velocity + 0.5f * uAgent[i];
-            //    }
-            //}
+
+            double[,] lc = new double[lcs.Count, 3];
+            int[] ct = new int[lcs.Count];
+            for (int i = 0; i < lcs.Count; ++i)
+            {
+                for (int j = 0; j < 3; ++j)
+                    lc[i, j] = lcs[i][j];
+
+                ct[i] = 1;
+            }
+
+            alglib.minqpsetlc(state, lc, ct);
+
+            alglib.minqpoptimize(state);
+            alglib.minqpresults(state, out v, out rep);
+
+            if (rep.terminationtype == 4 || rep.terminationtype == 7)
+            {
+                Velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
+            }
+            else
+            {
+                Velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
+
+            }
         }
-        //if (netForce.sqrMagnitude > 0 || uAgent.Count > 0 || uObstacle.Count > 0)
-        //{
-        //    List<double[]> lcs = new List<double[]>();
-
-        //    Vector3 fConstraint = netForce.normalized;
-        //    float fEquals = Vector3.Dot(fConstraint, vForce);
-
-        //    double[,] a = new double[,] { { 2, 0 }, { 0, 2 } };
-        //    double[] b = new double[] { -2 * vPref.x, -2 * vPref.z };
-        //    double[] v;
-        //    double[] fc = { fConstraint.x, fConstraint.z, fConstraint.x * vForce.x + fConstraint.z + vForce.z };
-
-        //    alglib.minqpstate state;
-        //    alglib.minqpreport rep;
-
-        //    alglib.minqpcreate(2, out state);
-        //    alglib.minqpsetquadraticterm(state, a);
-        //    alglib.minqpsetlinearterm(state, b);
-
-        //    if (netForce.sqrMagnitude > 0)
-        //        lcs.Add(fc);
-
-        //    if (uAgent.Count > 0)
-        //    {
-        //        for (int i = 0; i < uAgent.Count; ++i)
-        //        {
-        //            Vector3 uNorm = uAgent[i].normalized;
-        //            double[] orca1c = { uNorm.x, uNorm.z, (velocity.x + 0.5f * uAgent[i].x) * uNorm.x + (velocity.z + 0.5f * uAgent[i].z) * uNorm.z };
-        //            lcs.Add(orca1c);
-        //        }
-        //    }
-        //    if (uObstacle.Count > 0)
-        //    {
-        //        for (int i = 0; i < uObstacle.Count; ++i)
-        //        {
-        //            double[] orca2c = { nObstacle[i].x, nObstacle[i].z, (velocity.x + uObstacle[i].x) * nObstacle[i].x + (velocity.z + uObstacle[i].z) * nObstacle[i].z };
-        //            lcs.Add(orca2c);
-        //        }
-        //    }
-
-        //    double [,] lc = new double[lcs.Count, 3];
-        //    int[] ct = new int[lcs.Count];
-        //    for(int i=0; i<lcs.Count; ++i)
-        //    {
-        //        for(int j=0; j<3; ++j)
-        //            lc[i, j] = lcs[i][j];
-
-        //        ct[i] = 1;
-        //    }
-
-        //    alglib.minqpsetlc(state, lc, ct);
-
-        //    alglib.minqpoptimize(state);
-        //    alglib.minqpresults(state, out v, out rep);
-
-        //    if (rep.terminationtype == 4 || rep.terminationtype == 7)
-        //    {
-        //        Velocity = new Vector3((float)v[0], 0.0f, (float)v[1]);
-        //    }
-        //    else
-        //    {
-        //        Velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
-
-        //    }
-        //}
         else
         {
             Velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
         }
-        //else
 
         if (controlled)
         {
@@ -193,8 +172,6 @@ public class Agent : MonoBehaviour
             if(x != 0.0f || y != 0.0f)
                 Velocity = new Vector3(x, 0.0f, y);
         }
-            //else
-            //    velocity = Vector3.Lerp(velocity, vPref, 8.0f * Time.deltaTime);
 
         if (velocity.sqrMagnitude > 0.1f)
             agentTransform.rotation = Quaternion.LookRotation(velocity);
@@ -318,7 +295,6 @@ public class Agent : MonoBehaviour
         Vector3 relativeVelocity = velocity - v;
         float distSq = relativePosition.sqrMagnitude;
         float combinedRadius = 1.0f;// obstacle ? 2.0f : 1.0f;
-        float combinedRadiusSq = 1.0f;// obstacle ? 4.0f : 1.0f;
         float interpolateAmount = 0.2f;
 
         if (!Physics.Raycast(Position, velocity, relativePosition.magnitude + combinedRadius))
@@ -333,13 +309,13 @@ public class Agent : MonoBehaviour
 
         float dotProduct1 = Vector3.Dot(w, relativePosition);
 
-        if (dotProduct1 < 0.0f && dotProduct1 * dotProduct1 > combinedRadiusSq * wLengthSq)
+        if (dotProduct1 < 0.0f && dotProduct1 * dotProduct1 > combinedRadius * combinedRadius * wLengthSq)
         {
             u = (combinedRadius * interpolateAmount - w.magnitude) * w.normalized;
         }
         else
         {
-            float leg = Mathf.Sqrt(distSq - combinedRadiusSq);
+            float leg = Mathf.Sqrt(distSq - combinedRadius * combinedRadius);
 
             Vector3 direction;
 

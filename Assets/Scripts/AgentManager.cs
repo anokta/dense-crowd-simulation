@@ -114,6 +114,7 @@ public class AgentManager : MonoBehaviour
                     }
                 }
 
+                // Calculate forces
                 agents[i].PushAgents(neighbors);
                 agents[i].ResolveAgentCollisions(collidedNeighbors);
                 agents[i].CalculateDeceleration(neighbors);

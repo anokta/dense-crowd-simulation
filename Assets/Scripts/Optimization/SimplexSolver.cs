@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * NOT USED ANYMORE 
+ */
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -122,7 +126,6 @@ public class SimplexSolver
                 simplex[pivotRow][iCol] /= pivot;
             }
 
-
             for (int iRow = 0; iRow < numRows; iRow++)
             {
                 if (iRow != pivotRow)
@@ -138,11 +141,8 @@ public class SimplexSolver
 
         if (noSolution)
         {
-            Debug.Log("NABER");
             return Vector3.zero;
         }
-
-        //max = simplex[numRows - 1][numCols - 1];
 
         Vector3 x = Vector3.zero;
 
@@ -161,13 +161,13 @@ public class SimplexSolver
                 else if (simplex[j][iCol] != 0.0f)
                 {
                     isUnit = false;
-                }   
+                }
             }
 
             if (isUnit && !first)
-                x[iCol*2] = value;
+                x[iCol * 2] = value;
             else
-                x[iCol*2] = 0.0f;
+                x[iCol * 2] = 0.0f;
         }
 
 
